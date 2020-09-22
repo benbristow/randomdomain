@@ -63,7 +63,7 @@
         this.error = null;
 
         axios
-          .get("https://random-domain-api.azurewebsites.net/api/randomdomain")
+          .get("/api/RandomDomain")
           .then(response => {
             this.domainData = response.data.data;
           })
