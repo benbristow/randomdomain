@@ -1,0 +1,74 @@
+@import "~bootstrap/scss/bootstrap";
+
+html, body {
+  height: 100%;
+  overflow-y: hidden;
+}
+
+a {
+  color: $black;
+  text-decoration: underline;
+}
+
+noscript {
+  .no-javascript-banner {
+    background: $danger;
+    color: $white;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    padding: $spacer;
+  }
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  justify-content: center;
+  text-align: center;
+  height: 100%;
+  
+  footer {
+    position: absolute;
+    display: block;
+    width: 100%;
+    bottom: $spacer;
+  }
+}
+
+.spinner {
+  margin: 0 auto;
+  
+  &.spinner-border {
+    height: 4rem;
+    width: 4rem;
+  }
+}
+
+.outcome {
+  h1 {
+    @include media-breakpoint-down(sm) {
+      font-size: 1.8rem;
+    }
+
+    @include media-breakpoint-up(md) {
+      font-size: 3.5rem;
+    }
+  }
+
+  margin-bottom: $spacer;
+  padding: 0 $spacer;
+
+  .error {
+    color: $danger;
+    font-size: 1.4rem;
+    font-weight: bold;
+  }
+
+  @include media-breakpoint-down(sm) {
+    .btn {
+      display: block;
+    }
+  }
+}
