@@ -33,7 +33,6 @@
   import Vue from "vue";
   import Fragment from "vue-fragment";
   import axios from "axios";
-  import Bowser from "bowser";
 
   Vue.use(Fragment.Plugin);
 
@@ -77,9 +76,7 @@
       },
 
       handleClickLink() {
-        if (Bowser.getParser(window.navigator.userAgent).is("desktop")) {
-          this.getRandomDomain();
-        }
+        this.getRandomDomain();
       }
     }
   });
