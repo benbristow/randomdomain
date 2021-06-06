@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30002.166
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RandomDomainFunction", "RandomDomainFunction.csproj", "{8EF6926C-3C44-4AC8-A0E6-297ACDD6E572}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RandomDomain.Api", "RandomDomain.Api.csproj", "{8EF6926C-3C44-4AC8-A0E6-297ACDD6E572}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

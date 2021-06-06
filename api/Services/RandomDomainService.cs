@@ -1,27 +1,29 @@
-﻿namespace RandomDomainFunction.Services
+﻿using System;
+using System.Collections.Immutable;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Reflection;
+using System.Threading.Tasks;
+using Polly;
+using RandomDomain.Api.Exceptions;
+using RandomDomain.Api.Extensions;
+
+namespace RandomDomain.Api.Services
 {
-    using System;
-    using System.Collections.Immutable;
-    using System.IO;
-    using System.Linq;
-    using System.Net.Http;
-    using System.Reflection;
-    using System.Threading.Tasks;
-
-    using global::RandomDomainFunction.Models;
-    using Polly;
-
-    public class RandomDomainService
+    public interface IRandomDomainService
     {
-        private readonly ImmutableList<string> _words;
+        Task<Uri> GetRandomDomain();
+    }
 
-        private readonly ImmutableList<string> _extensions;
-
-        private readonly HttpClient _httpClient = new HttpClient() { Timeout = TimeSpan.FromSeconds(1) };
-
+    public class RandomDomainService : IRandomDomainService
+    {
         private const int BatchSize = 5;
-
         private const int BatchesToTry = 10;
+
+        private readonly ImmutableList<string> _words;
+        private readonly ImmutableList<string> _extensions;
+        private readonly HttpClient _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(1) };
 
         public RandomDomainService()
         {

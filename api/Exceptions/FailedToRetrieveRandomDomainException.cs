@@ -1,7 +1,7 @@
-﻿namespace RandomDomainFunction.Models
-{
-    using System;
+﻿using System;
 
+namespace RandomDomain.Api.Exceptions
+{
     public class FailedToRetrieveRandomDomainException : Exception
     {
     }

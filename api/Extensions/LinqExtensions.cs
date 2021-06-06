@@ -1,10 +1,10 @@
-﻿namespace RandomDomainFunction
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Collections.Immutable;
-    using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 
+namespace RandomDomain.Api.Extensions
+{
     public static class LinqExtensions
     {
         public static T SingleRandomOrDefault<T>(this IEnumerable<T> collection)
