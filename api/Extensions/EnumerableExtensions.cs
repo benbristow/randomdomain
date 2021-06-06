@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace RandomDomain.Api.Extensions
 {
-    public static class LinqExtensions
+    public static class EnumerableExtensions
     {
         public static T SingleRandomOrDefault<T>(this IEnumerable<T> collection)
         {
