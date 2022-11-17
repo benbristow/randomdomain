@@ -7,33 +7,32 @@ using RandomDomain.Api.Exceptions;
 using RandomDomain.Api.Services;
 using RandomDomain.Api.ViewModels;
 
-namespace RandomDomain.Api.Functions
+namespace RandomDomain.Api.Functions;
+
+public class RandomDomain
 {
-    public class RandomDomain
+    private readonly IRandomDomainService _randomDomainService;
+
+    public RandomDomain(IRandomDomainService randomDomainService)
     {
-        private readonly IRandomDomainService _randomDomainService;
+        _randomDomainService = randomDomainService;
+    }
 
-        public RandomDomain(IRandomDomainService randomDomainService)
+    [FunctionName(nameof(RandomDomain))]
+    public async Task<IActionResult> RunAsync(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)] HttpRequest req)
+    {
+        try
         {
-            _randomDomainService = randomDomainService;
+            var randomDomain = await _randomDomainService.GetRandomDomain();
+
+            return new OkObjectResult(ApiResponseViewModel.Create(
+                new RandomDomainViewModel(randomDomain)));
         }
-
-        [FunctionName(nameof(RandomDomain))]
-        public async Task<IActionResult> RunAsync(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)] HttpRequest req)
+        catch (FailedToRetrieveRandomDomainException)
         {
-            try
-            {
-                var randomDomain = await _randomDomainService.GetRandomDomain();
-
-                return new OkObjectResult(ApiResponseViewModel.Create(
-                    new RandomDomainViewModel(randomDomain)));
-            }
-            catch (FailedToRetrieveRandomDomainException)
-            {
-                return new BadRequestObjectResult(
-                    ApiResponseViewModel.CreateWithError("Failed to retrieve random domain"));
-            }
+            return new BadRequestObjectResult(
+                ApiResponseViewModel.CreateWithError("Failed to retrieve random domain"));
         }
     }
 }

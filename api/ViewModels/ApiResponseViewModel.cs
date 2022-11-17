@@ -1,29 +1,28 @@
 ﻿using Newtonsoft.Json;
 
-namespace RandomDomain.Api.ViewModels
+namespace RandomDomain.Api.ViewModels;
+
+public class ApiResponseViewModel
 {
-    public class ApiResponseViewModel
+    [JsonProperty]
+    public object Data { get; private set; }
+
+    [JsonProperty]
+    public string Error { get; private set; }
+
+    public static ApiResponseViewModel Create<T>(T data)
     {
-        [JsonProperty]
-        public object Data { get; private set; }
-
-        [JsonProperty]
-        public string Error { get; private set; }
-
-        public static ApiResponseViewModel Create<T>(T data)
+        return new ApiResponseViewModel
         {
-            return new ApiResponseViewModel()
-            {
-                Data = data
-            };
-        }
+            Data = data
+        };
+    }
 
-        public static ApiResponseViewModel CreateWithError(string error)
+    public static ApiResponseViewModel CreateWithError(string error)
+    {
+        return new ApiResponseViewModel
         {
-            return new ApiResponseViewModel()
-            {
-                Error = error
-            };
-        }
+            Error = error
+        };
     }
 }

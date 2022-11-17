@@ -1,8 +1,7 @@
 ﻿using System;
 
-namespace RandomDomain.Api.Exceptions
+namespace RandomDomain.Api.Exceptions;
+
+public class FailedToRetrieveRandomDomainException : Exception
 {
-    public class FailedToRetrieveRandomDomainException : Exception
-    {
-    }
 }

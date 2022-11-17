@@ -9,89 +9,88 @@ using Polly;
 using RandomDomain.Api.Exceptions;
 using RandomDomain.Api.Extensions;
 
-namespace RandomDomain.Api.Services
+namespace RandomDomain.Api.Services;
+
+public interface IRandomDomainService
 {
-    public interface IRandomDomainService
+    Task<Uri> GetRandomDomain();
+}
+
+public class RandomDomainService : IRandomDomainService
+{
+    private const int BatchSize = 5;
+    private const int BatchesToTry = 10;
+
+    private readonly ImmutableList<string> _words;
+    private readonly ImmutableList<string> _extensions;
+    private readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromSeconds(1) };
+
+    public RandomDomainService()
     {
-        Task<Uri> GetRandomDomain();
+        _words = LoadWordListFromEmbeddedFile("words.txt");
+        _extensions = LoadWordListFromEmbeddedFile("extensions.txt");
     }
 
-    public class RandomDomainService : IRandomDomainService
+    public async Task<Uri> GetRandomDomain()
     {
-        private const int BatchSize = 5;
-        private const int BatchesToTry = 10;
+        return await
+            Policy
+                .Handle<FailedToRetrieveRandomDomainException>()
+                .RetryAsync(BatchesToTry)
+                .ExecuteAsync(TryGetRandomDomainFromParallelBatch);
+    }
 
-        private readonly ImmutableList<string> _words;
-        private readonly ImmutableList<string> _extensions;
-        private readonly HttpClient _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(1) };
+    private async Task<Uri> TryGetRandomDomainFromParallelBatch()
+    {
+        var tasks =
+            Enumerable.Range(1, BatchSize)
+                .Select(_ => TryGetRandomAliveDomain())
+                .AsParallel();
 
-        public RandomDomainService()
+        var results = await Task.WhenAll(tasks);
+
+        return results.Where(r => r != null).SingleRandomOrDefault() ?? throw new FailedToRetrieveRandomDomainException();
+    }
+
+    private async Task<Uri> TryGetRandomAliveDomain()
+    {
+        var uri = new Uri($"http://{_words.SingleRandomOrDefault()}.{_extensions.SingleRandomOrDefault()}");
+
+        if (!await TestUriAlive(uri))
         {
-            _words = LoadWordListFromEmbeddedFile("words.txt");
-            _extensions = LoadWordListFromEmbeddedFile("extensions.txt");
+            return null;
         }
 
-        public async Task<Uri> GetRandomDomain()
+        return uri;
+
+        async Task<bool> TestUriAlive(Uri testUri)
         {
-            return await
-                Policy
-                    .Handle<FailedToRetrieveRandomDomainException>()
-                    .RetryAsync(BatchesToTry)
-                    .ExecuteAsync(TryGetRandomDomainFromParallelBatch);
-        }
-
-        private async Task<Uri> TryGetRandomDomainFromParallelBatch()
-        {
-            var tasks =
-                Enumerable.Range(1, BatchSize)
-                    .Select(_ => TryGetRandomAliveDomain())
-                    .AsParallel();
-
-            var results = await Task.WhenAll(tasks);
-
-            return results.Where(r => r != null).SingleRandomOrDefault() ?? throw new FailedToRetrieveRandomDomainException();
-        }
-
-        private async Task<Uri> TryGetRandomAliveDomain()
-        {
-            var uri = new Uri($"http://{_words.SingleRandomOrDefault()}.{_extensions.SingleRandomOrDefault()}");
-
-            if (!await TestUriAlive(uri))
+            try
             {
-                return null;
+                var checkingResponse = await _httpClient.GetAsync(testUri);
+
+                checkingResponse.EnsureSuccessStatusCode();
+
+                return true;
             }
-
-            return uri;
-
-            async Task<bool> TestUriAlive(Uri testUri)
+            catch
             {
-                try
-                {
-                    var checkingResponse = await _httpClient.GetAsync(testUri);
-
-                    checkingResponse.EnsureSuccessStatusCode();
-
-                    return true;
-                }
-                catch
-                {
-                    return false;
-                }
+                return false;
             }
         }
+    }
 
-        private static ImmutableList<string> LoadWordListFromEmbeddedFile(string fileName)
-        {
-            var assembly = Assembly.GetExecutingAssembly();
-            var wordListResourceName = assembly.GetManifestResourceNames().Single(r => r.EndsWith(fileName));
+    private static ImmutableList<string> LoadWordListFromEmbeddedFile(string fileName)
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        var wordListResourceName = assembly.GetManifestResourceNames().Single(r => r.EndsWith(fileName));
 
-            using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(wordListResourceName);
-            using var reader = new StreamReader(stream!);
+        using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(wordListResourceName);
+        using var reader = new StreamReader(stream!);
 
-            return reader
-                .ReadToEnd()
-                .Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries)
-                .ToImmutableList();
-        }
+        return reader
+            .ReadToEnd()
+            .Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries)
+            .ToImmutableList();
     }
 }
